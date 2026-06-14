@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fantamondiale 2026</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f5f5f3;
+    --bg3: #eeede8;
+    --text: #1a1a18;
+    --text2: #6b6b67;
+    --text3: #9d9d99;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --green: #1D9E75;
+    --green-dark: #0F6E56;
+    --green-bg: #E1F5EE;
+    --green-text: #085041;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg2: #252523;
+      --bg3: #2e2e2c;
+      --text: #f0efeb;
+      --text2: #a8a8a4;
+      --text3: #6b6b67;
+      --border: rgba(255,255,255,0.12);
+      --border2: rgba(255,255,255,0.22);
+      --green-bg: #083d2e;
+      --green-text: #9FE1CB;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg3);
+    min-height: 100vh;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 1rem; }
+
+  header {
+    background: var(--bg);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0.875rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  header .inner { max-width: 900px; margin: 0 auto; padding: 0 1rem; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 17px; font-weight: 600; flex: 1; }
+  .header-badge { font-size: 11px; background: var(--bg2); color: var(--text2); padding: 2px 10px; border-radius: 20px; border: 0.5px solid var(--border); }
+
+  nav { display: flex; gap: 6px; }
+  nav button {
+    font-size: 12px; padding: 5px 13px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border2);
+    background: transparent; color: var(--text2);
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+    font-family: inherit;
+  }
+  nav button.active { background: var(--green); color: #fff; border-color: var(--green); font-weight: 500; }
+  nav button:hover:not(.active) { background: var(--bg2); }
+
+  .page { display: none; padding-top: 1rem; }
+  .page.active { display: block; }
+
+  .section-title { font-size: 16px; font-weight: 600; margin-bottom: 0.875rem; }
+
+  .card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 0.875rem 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* ── CLASSIFICA ── */
+  .rank-table { width: 100%; border-collapse: collapse; }
+  .rank-table th { font-size: 11px; color: var(--text2); text-align: left; padding: 6px 8px; border-bottom: 0.5px solid var(--border); font-weight: 500; }
+  .rank-table td { padding: 9px 8px; border-bottom: 0.5px solid var(--border); font-size: 13px; vertical-align: middle; }
+  .rank-table tr:last-child td { border-bottom: none; }
+  .rank-table tbody tr:hover td { background: var(--bg2); }
+  .av { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+  .score-green { color: var(--green); font-weight: 600; }
+  .bar-mini { display: inline-block; height: 6px; border-radius: 3px; background: var(--green); vertical-align: middle; }
+  .top3-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-top: 0.875rem; }
+  .top3-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 10px 12px; }
+
+  /* ── CALENDARIO ── */
+  .filter-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+  .filter-bar input, .filter-bar select {
+    font-size: 12px; padding: 5px 10px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border2);
+    background: var(--bg); color: var(--text);
+    font-family: inherit;
+  }
+  .filter-note { font-size: 11px; color: var(--text2); margin-bottom: 8px; }
+
+  .day-block { margin-bottom: 1.25rem; }
+  .day-header {
+    font-size: 12px; font-weight: 600; color: var(--text2);
+    padding: 5px 0; border-bottom: 0.5px solid var(--border);
+    margin-bottom: 7px; display: flex; align-items: center; gap: 8px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .day-badge { background: var(--green); color: #fff; font-size: 10px; font-weight: 500; padding: 1px 8px; border-radius: 10px; }
+
+  .match-card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 9px 12px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .match-card:hover { border-color: var(--green); }
+  .match-card.expanded { border-color: var(--green); }
+
+  .match-header { display: flex; align-items: center; gap: 8px; user-select: none; }
+  .match-group { font-size: 10px; background: var(--bg2); padding: 2px 7px; border-radius: 10px; color: var(--text2); white-space: nowrap; }
+  .match-teams { flex: 1; font-size: 13px; font-weight: 500; }
+  .match-teams span { color: var(--text2); font-weight: 400; }
+  .match-result { font-size: 13px; font-weight: 600; color: var(--green); min-width: 45px; text-align: right; }
+  .match-votes-badge { font-size: 10px; background: var(--bg2); color: var(--text2); padding: 2px 7px; border-radius: 10px; border: 0.5px solid var(--border); }
+
+  .match-detail { display: none; margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--border); }
+  .match-card.expanded .match-detail { display: block; }
+
+  .detail-head {
+    display: grid; grid-template-columns: 1fr 90px 70px;
+    gap: 6px; padding: 3px 0;
+    font-size: 11px; font-weight: 500; color: var(--text2);
+    border-bottom: 0.5px solid var(--border); margin-bottom: 2px;
+  }
+  .detail-row {
+    display: grid; grid-template-columns: 1fr 90px 70px;
+    gap: 6px; align-items: center;
+    padding: 5px 0; border-bottom: 0.5px solid var(--border); font-size: 12px;
+  }
+  .detail-row:last-of-type { border-bottom: none; }
+  .detail-row input[type="number"] {
+    width: 65px; font-size: 12px; padding: 3px 6px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border2);
+    background: var(--bg); color: var(--text);
+    font-family: inherit;
+  }
+  .detail-row input[type="number"]:focus { outline: none; border-color: var(--green); }
+
+  .result-row { margin-top: 10px; display: flex; align-items: center; gap: 8px; }
+  .result-row label { font-size: 12px; color: var(--text2); }
+  .result-row input {
+    width: 80px; font-size: 12px; padding: 3px 8px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border2);
+    background: var(--bg); color: var(--text);
+    font-family: inherit;
+  }
+  .no-players { font-size: 12px; color: var(--text2); padding: 8px 0; }
+
+  /* ── ROSE ── */
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; }
+  .team-box {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 10px 12px;
+  }
+  .team-box-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .player-list { font-size: 12px; }
+  .player-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 0; border-bottom: 0.5px solid var(--border);
+  }
+  .player-item:last-child { border-bottom: none; }
+  .player-item .pnation { color: var(--text2); font-size: 11px; min-width: 70px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <h1>🏆 Fantamondiale 2026</h1>
+    <span class="header-badge" id="hbadge">104 partite · 10 squadre</span>
+    <nav>
+      <button class="active" onclick="nav('classifica',this)"><i class="ti ti-trophy"></i> Classifica</button>
+      <button onclick="nav('calendario',this)"><i class="ti ti-calendar"></i> Calendario</button>
+      <button onclick="nav('rose',this)"><i class="ti ti-users"></i> Rose</button>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+  <div id="page-classifica" class="page active"></div>
+  <div id="page-calendario" class="page"></div>
+  <div id="page-rose" class="page"></div>
+</div>
+
+<script>
+const AVATARS=[
+  {bg:'#E1F5EE',c:'#085041'},{bg:'#E6F1FB',c:'#0C447C'},{bg:'#EEEDFE',c:'#3C3489'},
+  {bg:'#FAECE7',c:'#712B13'},{bg:'#FBEAF0',c:'#72243E'},{bg:'#FAEEDA',c:'#633806'},
+  {bg:'#EAF3DE',c:'#27500A'},{bg:'#FCEBEB',c:'#791F1F'},{bg:'#F1EFE8',c:'#444441'},
+  {bg:'#E1F5EE',c:'#04342C'}
+];
+
+const TEAMS=[
+  {id:'obizzo',name:'Obizzo',players:[
+    {name:'Lautaro',nation:'Argentina'},{name:'Rabiot',nation:'Francia'},{name:'McKennie',nation:'USA'},
+    {name:'Kone',nation:'Canada'},{name:'Vasquez',nation:'Messico'},{name:'Heggem',nation:'Norvegia'}
+  ]},
+  {id:'tori',name:'Tori',players:[
+    {name:'Malen',nation:'Olanda'},{name:'Bonny',nation:"Costa d'Avorio"},{name:'Pulisic',nation:'USA'},
+    {name:'Dumfries',nation:'Olanda'},{name:'Ederson',nation:'Brasile'},{name:'Ostigard',nation:'Norvegia'},
+    {name:'Celik',nation:'Turchia'},{name:'Maignan',nation:'Francia'},{name:'Adams',nation:'Scozia'}
+  ]},
+  {id:'rayo',name:'Rayo',players:[
+    {name:'Leao',nation:'Portogallo'},{name:'Adams S.',nation:'Scozia'}
+  ]},
+  {id:'visby',name:'Visby',players:[
+    {name:'Freuler',nation:'Svizzera'},{name:'Pavlovic',nation:'Germania'},{name:'Mina',nation:'Colombia'},
+    {name:'Bremer',nation:'Brasile'},{name:'Thuram',nation:'Francia'},{name:'Nkunku',nation:'Francia'},
+    {name:'Bisseck',nation:'Germania'},{name:'De Bruyne',nation:'Belgio'},{name:'De Winter',nation:'Belgio'},
+    {name:'Modric',nation:'Croazia'},{name:'Baturina',nation:'Croazia'},{name:'Sommer',nation:'Svizzera'},
+    {name:'Chanaloglu',nation:'Turchia'},{name:'Hien',nation:'Svezia'},{name:'Holm',nation:'Svezia'},
+    {name:'Diego Carlos',nation:'Brasile'},{name:'Giovane',nation:'Brasile'},{name:'Atta',nation:'Francia'},
+    {name:'Martinez',nation:'Spagna'},{name:'Moreno',nation:'Spagna'},{name:'Oliveira',nation:'Portogallo'}
+  ]},
+  {id:'atlas',name:'Atlas',players:[
+    {name:'Yildiz',nation:'Turchia'},{name:'Conceicao',nation:'Portogallo'},{name:'Akanji',nation:'Svizzera'}
+  ]},
+  {id:'brellgusti',name:'Brellgusti',players:[
+    {name:'McTominay',nation:'Scozia'},{name:'David',nation:'Canada'},{name:'Kolasinac',nation:'Bosnia'}
+  ]},
+  {id:'rione',name:'Rione',players:[
+    {name:'Pasalic',nation:'Croazia'},{name:'Lewis Ferguson',nation:'Scozia'},{name:'Lucumi',nation:'Colombia'},
+    {name:'Vlasic',nation:'Croazia'},{name:'Pongracic',nation:'Croazia'},{name:'Nico Paz',nation:'Argentina'}
+  ]},
+  {id:'diegarak',name:'Diegarak',players:[
+    {name:'Sulemana',nation:'Ghana'},{name:'Carlos Augusto',nation:'Brasile'},{name:'Zion Suzuki',nation:'Giappone'},
+    {name:'Ondrejka',nation:'Slovacchia'},{name:'Ndicka',nation:'Nigeria'},{name:'Volpato',nation:'Australia'},
+    {name:'Skorupski',nation:'Polonia'},{name:'Juan Miranda',nation:'Spagna'},{name:'Pavard',nation:'Francia'}
+  ]},
+  {id:'marrauderz',name:'Marrauderz',players:[
+    {name:'Vergara',nation:'Spagna'}
+  ]},
+  {id:'skynet',name:'Skynet',players:[
+    {name:'Fofana Y.',nation:'Francia'},{name:'Kone M.',nation:'Francia'},{name:'Lukaku R.',nation:'Belgio'},
+    {name:'Dovbyk A.',nation:'Ucraina'},{name:'Hermoso M.',nation:'Spagna'},{name:'Saelemekers A.',nation:'Belgio'}
+  ]}
+];
+
+// Mappa nazione → lista {player, team}
+const NATION_MAP={};
+TEAMS.forEach(t=>{
+  t.players.forEach(p=>{
+    const k=p.nation.toLowerCase();
+    if(!NATION_MAP[k])NATION_MAP[k]=[];
+    NATION_MAP[k].push({player:p,team:t});
+  });
+});
+
+function getPlayersInMatch(n1,n2){
+  const res=[];
+  [n1,n2].forEach(nation=>{
+    (NATION_MAP[nation.toLowerCase()]||[]).forEach(x=>res.push({...x,nation}));
+  });
+  return res;
+}
+
+// CALENDARIO COMPLETO (tutte le 104 partite)
+const MATCHES=[
+  // ── GIRONI ──
+  {id:'m1',  date:'2026-06-11',day:'Giovedì 11 Giugno',   phase:'Girone A', t1:'Messico',        t2:'Sudafrica',     result:'2-0'},
+  {id:'m2',  date:'2026-06-11',day:'Giovedì 11 Giugno',   phase:'Girone A', t1:'Corea del Sud',  t2:'Cechia',        result:'2-1'},
+  {id:'m3',  date:'2026-06-12',day:'Venerdì 12 Giugno',   phase:'Girone B', t1:'Canada',         t2:'Bosnia',        result:'1-1'},
+  {id:'m4',  date:'2026-06-12',day:'Venerdì 12 Giugno',   phase:'Girone D', t1:'USA',            t2:'Paraguay',      result:'4-1'},
+  {id:'m5',  date:'2026-06-13',day:'Sabato 13 Giugno',    phase:'Girone B', t1:'Qatar',          t2:'Svizzera',      result:''},
+  {id:'m6',  date:'2026-06-13',day:'Sabato 13 Giugno',    phase:'Girone C', t1:'Brasile',        t2:'Marocco',       result:''},
+  {id:'m7',  date:'2026-06-13',day:'Sabato 13 Giugno',    phase:'Girone C', t1:'Haiti',          t2:'Scozia',        result:''},
+  {id:'m8',  date:'2026-06-14',day:'Domenica 14 Giugno',  phase:'Girone D', t1:'Australia',      t2:'Turchia',       result:''},
+  {id:'m9',  date:'2026-06-14',day:'Domenica 14 Giugno',  phase:'Girone E', t1:'Germania',       t2:'Curacao',       result:''},
+  {id:'m10', date:'2026-06-14',day:'Domenica 14 Giugno',  phase:'Girone F', t1:'Olanda',         t2:'Giappone',      result:''},
+  {id:'m11', date:'2026-06-14',day:'Domenica 14 Giugno',  phase:'Girone E', t1:"Costa d'Avorio", t2:'Ecuador',       result:''},
+  {id:'m12', date:'2026-06-14',day:'Domenica 14 Giugno',  phase:'Girone F', t1:'Svezia',         t2:'Tunisia',       result:''},
+  {id:'m13', date:'2026-06-15',day:'Lunedì 15 Giugno',    phase:'Girone H', t1:'Spagna',         t2:'Capo Verde',    result:''},
+  {id:'m14', date:'2026-06-15',day:'Lunedì 15 Giugno',    phase:'Girone G', t1:'Belgio',         t2:'Egitto',        result:''},
+  {id:'m15', date:'2026-06-15',day:'Lunedì 15 Giugno',    phase:'Girone H', t1:'Arabia Saudita', t2:'Uruguay',       result:''},
+  {id:'m16', date:'2026-06-15',day:'Lunedì 15 Giugno',    phase:'Girone G', t1:'Iran',           t2:'Nuova Zelanda', result:''},
+  {id:'m17', date:'2026-06-16',day:'Martedì 16 Giugno',   phase:'Girone I', t1:'Francia',        t2:'Senegal',       result:''},
+  {id:'m18', date:'2026-06-16',day:'Martedì 16 Giugno',   phase:'Girone I', t1:'Iraq',           t2:'Norvegia',      result:''},
+  {id:'m19', date:'2026-06-16',day:'Martedì 16 Giugno',   phase:'Girone J', t1:'Argentina',      t2:'Algeria',       result:''},
+  {id:'m20', date:'2026-06-17',day:'Mercoledì 17 Giugno', phase:'Girone J', t1:'Austria',        t2:'Giordania',     result:''},
+  {id:'m21', date:'2026-06-17',day:'Mercoledì 17 Giugno', phase:'Girone K', t1:'Portogallo',     t2:'Congo RD',      result:''},
+  {id:'m22', date:'2026-06-17',day:'Mercoledì 17 Giugno', phase:'Girone L', t1:'Inghilterra',    t2:'Croazia',       result:''},
+  {id:'m23', date:'2026-06-17',day:'Mercoledì 17 Giugno', phase:'Girone L', t1:'Ghana',          t2:'Panama',        result:''},
+  {id:'m24', date:'2026-06-17',day:'Mercoledì 17 Giugno', phase:'Girone K', t1:'Uzbekistan',     t2:'Colombia',      result:''},
+  {id:'m25', date:'2026-06-18',day:'Giovedì 18 Giugno',   phase:'Girone A', t1:'Cechia',         t2:'Sudafrica',     result:''},
+  {id:'m26', date:'2026-06-18',day:'Giovedì 18 Giugno',   phase:'Girone B', t1:'Svizzera',       t2:'Bosnia',        result:''},
+  {id:'m27', date:'2026-06-18',day:'Giovedì 18 Giugno',   phase:'Girone B', t1:'Canada',         t2:'Qatar',         result:''},
+  {id:'m28', date:'2026-06-18',day:'Giovedì 18 Giugno',   phase:'Girone A', t1:'Messico',        t2:'Corea del Sud', result:''},
+  {id:'m29', date:'2026-06-19',day:'Venerdì 19 Giugno',   phase:'Girone D', t1:'USA',            t2:'Australia',     result:''},
+  {id:'m30', date:'2026-06-19',day:'Venerdì 19 Giugno',   phase:'Girone C', t1:'Scozia',         t2:'Marocco',       result:''},
+  {id:'m31', date:'2026-06-19',day:'Venerdì 19 Giugno',   phase:'Girone C', t1:'Brasile',        t2:'Haiti',         result:''},
+  {id:'m32', date:'2026-06-19',day:'Venerdì 19 Giugno',   phase:'Girone D', t1:'Turchia',        t2:'Paraguay',      result:''},
+  {id:'m33', date:'2026-06-20',day:'Sabato 20 Giugno',    phase:'Girone F', t1:'Olanda',         t2:'Svezia',        result:''},
+  {id:'m34', date:'2026-06-20',day:'Sabato 20 Giugno',    phase:'Girone E', t1:'Germania',       t2:"Costa d'Avorio",result:''},
+  {id:'m35', date:'2026-06-20',day:'Sabato 20 Giugno',    phase:'Girone E', t1:'Ecuador',        t2:'Curacao',       result:''},
+  {id:'m36', date:'2026-06-21',day:'Domenica 21 Giugno',  phase:'Girone F', t1:'Tunisia',        t2:'Giappone',      result:''},
+  {id:'m37', date:'2026-06-21',day:'Domenica 21 Giugno',  phase:'Girone H', t1:'Spagna',         t2:'Arabia Saudita',result:''},
+  {id:'m38', date:'2026-06-21',day:'Domenica 21 Giugno',  phase:'Girone G', t1:'Belgio',         t2:'Iran',          result:''},
+  {id:'m39', date:'2026-06-21',day:'Domenica 21 Giugno',  phase:'Girone H', t1:'Uruguay',        t2:'Capo Verde',    result:''},
+  {id:'m40', date:'2026-06-21',day:'Domenica 21 Giugno',  phase:'Girone G', t1:'Nuova Zelanda',  t2:'Egitto',        result:''},
+  {id:'m41', date:'2026-06-22',day:'Lunedì 22 Giugno',    phase:'Girone J', t1:'Argentina',      t2:'Austria',       result:''},
+  {id:'m42', date:'2026-06-22',day:'Lunedì 22 Giugno',    phase:'Girone I', t1:'Francia',        t2:'Iraq',          result:''},
+  {id:'m43', date:'2026-06-22',day:'Lunedì 22 Giugno',    phase:'Girone I', t1:'Norvegia',       t2:'Senegal',       result:''},
+  {id:'m44', date:'2026-06-22',day:'Lunedì 22 Giugno',    phase:'Girone J', t1:'Giordania',      t2:'Algeria',       result:''},
+  {id:'m45', date:'2026-06-23',day:'Martedì 23 Giugno',   phase:'Girone K', t1:'Portogallo',     t2:'Uzbekistan',    result:''},
+  {id:'m46', date:'2026-06-23',day:'Martedì 23 Giugno',   phase:'Girone L', t1:'Inghilterra',    t2:'Ghana',         result:''},
+  {id:'m47', date:'2026-06-23',day:'Martedì 23 Giugno',   phase:'Girone L', t1:'Panama',         t2:'Croazia',       result:''},
+  {id:'m48', date:'2026-06-23',day:'Martedì 23 Giugno',   phase:'Girone K', t1:'Colombia',       t2:'Congo RD',      result:''},
+  {id:'m49', date:'2026-06-24',day:'Mercoledì 24 Giugno', phase:'Girone B', t1:'Svizzera',       t2:'Canada',        result:''},
+  {id:'m50', date:'2026-06-24',day:'Mercoledì 24 Giugno', phase:'Girone B', t1:'Bosnia',         t2:'Qatar',         result:''},
+  {id:'m51', date:'2026-06-24',day:'Mercoledì 24 Giugno', phase:'Girone C', t1:'Scozia',         t2:'Brasile',       result:''},
+  {id:'m52', date:'2026-06-24',day:'Mercoledì 24 Giugno', phase:'Girone C', t1:'Marocco',        t2:'Haiti',         result:''},
+  {id:'m53', date:'2026-06-24',day:'Mercoledì 24 Giugno', phase:'Girone A', t1:'Cechia',         t2:'Messico',       result:''},
+  {id:'m54', date:'2026-06-24',day:'Mercoledì 24 Giugno', phase:'Girone A', t1:'Sudafrica',      t2:'Corea del Sud', result:''},
+  {id:'m55', date:'2026-06-25',day:'Giovedì 25 Giugno',   phase:'Girone E', t1:'Curacao',        t2:"Costa d'Avorio",result:''},
+  {id:'m56', date:'2026-06-25',day:'Giovedì 25 Giugno',   phase:'Girone E', t1:'Ecuador',        t2:'Germania',      result:''},
+  {id:'m57', date:'2026-06-25',day:'Giovedì 25 Giugno',   phase:'Girone F', t1:'Giappone',       t2:'Svezia',        result:''},
+  {id:'m58', date:'2026-06-25',day:'Giovedì 25 Giugno',   phase:'Girone F', t1:'Tunisia',        t2:'Olanda',        result:''},
+  {id:'m59', date:'2026-06-25',day:'Giovedì 25 Giugno',   phase:'Girone D', t1:'Turchia',        t2:'USA',           result:''},
+  {id:'m60', date:'2026-06-25',day:'Giovedì 25 Giugno',   phase:'Girone D', t1:'Paraguay',       t2:'Australia',     result:''},
+  {id:'m61', date:'2026-06-26',day:'Venerdì 26 Giugno',   phase:'Girone I', t1:'Norvegia',       t2:'Francia',       result:''},
+  {id:'m62', date:'2026-06-26',day:'Venerdì 26 Giugno',   phase:'Girone I', t1:'Senegal',        t2:'Iraq',          result:''},
+  {id:'m63', date:'2026-06-26',day:'Venerdì 26 Giugno',   phase:'Girone H', t1:'Capo Verde',     t2:'Arabia Saudita',result:''},
+  {id:'m64', date:'2026-06-26',day:'Venerdì 26 Giugno',   phase:'Girone H', t1:'Uruguay',        t2:'Spagna',        result:''},
+  {id:'m65', date:'2026-06-26',day:'Venerdì 26 Giugno',   phase:'Girone G', t1:'Egitto',         t2:'Iran',          result:''},
+  {id:'m66', date:'2026-06-26',day:'Venerdì 26 Giugno',   phase:'Girone G', t1:'Nuova Zelanda',  t2:'Belgio',        result:''},
+  {id:'m67', date:'2026-06-27',day:'Sabato 27 Giugno',    phase:'Girone L', t1:'Panama',         t2:'Inghilterra',   result:''},
+  {id:'m68', date:'2026-06-27',day:'Sabato 27 Giugno',    phase:'Girone L', t1:'Croazia',        t2:'Ghana',         result:''},
+  {id:'m69', date:'2026-06-27',day:'Sabato 27 Giugno',    phase:'Girone K', t1:'Colombia',       t2:'Portogallo',    result:''},
+  {id:'m70', date:'2026-06-27',day:'Sabato 27 Giugno',    phase:'Girone K', t1:'Congo RD',       t2:'Uzbekistan',    result:''},
+  {id:'m71', date:'2026-06-27',day:'Sabato 27 Giugno',    phase:'Girone J', t1:'Algeria',        t2:'Austria',       result:''},
+  {id:'m72', date:'2026-06-27',day:'Sabato 27 Giugno',    phase:'Girone J', t1:'Giordania',      t2:'Argentina',     result:''},
+  // ── ROUND OF 32 ──
+  {id:'m73', date:'2026-06-28',day:'Domenica 28 Giugno',  phase:'Round of 32', t1:'2ª Gr.A',     t2:'2ª Gr.B',       result:''},
+  {id:'m74', date:'2026-06-29',day:'Lunedì 29 Giugno',    phase:'Round of 32', t1:'1ª Gr.E',     t2:'3ª migliore',   result:''},
+  {id:'m75', date:'2026-06-29',day:'Lunedì 29 Giugno',    phase:'Round of 32', t1:'1ª Gr.F',     t2:'2ª Gr.C',       result:''},
+  {id:'m76', date:'2026-06-29',day:'Lunedì 29 Giugno',    phase:'Round of 32', t1:'1ª Gr.C',     t2:'2ª Gr.F',       result:''},
+  {id:'m77', date:'2026-06-30',day:'Martedì 30 Giugno',   phase:'Round of 32', t1:'1ª Gr.I',     t2:'3ª migliore',   result:''},
+  {id:'m78', date:'2026-06-30',day:'Martedì 30 Giugno',   phase:'Round of 32', t1:'2ª Gr.E',     t2:'2ª Gr.I',       result:''},
+  {id:'m79', date:'2026-06-30',day:'Martedì 30 Giugno',   phase:'Round of 32', t1:'1ª Gr.A',     t2:'3ª migliore',   result:''},
+  {id:'m80', date:'2026-07-01',day:'Mercoledì 1 Luglio',  phase:'Round of 32', t1:'1ª Gr.L',     t2:'3ª migliore',   result:''},
+  {id:'m81', date:'2026-07-01',day:'Mercoledì 1 Luglio',  phase:'Round of 32', t1:'1ª Gr.D',     t2:'3ª migliore',   result:''},
+  {id:'m82', date:'2026-07-01',day:'Mercoledì 1 Luglio',  phase:'Round of 32', t1:'1ª Gr.G',     t2:'3ª migliore',   result:''},
+  {id:'m83', date:'2026-07-02',day:'Giovedì 2 Luglio',    phase:'Round of 32', t1:'2ª Gr.K',     t2:'2ª Gr.L',       result:''},
+  {id:'m84', date:'2026-07-02',day:'Giovedì 2 Luglio',    phase:'Round of 32', t1:'1ª Gr.H',     t2:'2ª Gr.J',       result:''},
+  {id:'m85', date:'2026-07-02',day:'Giovedì 2 Luglio',    phase:'Round of 32', t1:'1ª Gr.B',     t2:'3ª migliore',   result:''},
+  {id:'m86', date:'2026-07-03',day:'Venerdì 3 Luglio',    phase:'Round of 32', t1:'1ª Gr.J',     t2:'2ª Gr.H',       result:''},
+  {id:'m87', date:'2026-07-03',day:'Venerdì 3 Luglio',    phase:'Round of 32', t1:'1ª Gr.K',     t2:'3ª migliore',   result:''},
+  {id:'m88', date:'2026-07-03',day:'Venerdì 3 Luglio',    phase:'Round of 32', t1:'2ª Gr.D',     t2:'2ª Gr.G',       result:''},
+  // ── ROUND OF 16 ──
+  {id:'m89', date:'2026-07-04',day:'Sabato 4 Luglio',     phase:'Round of 16', t1:'Vince M74',   t2:'Vince M77',     result:''},
+  {id:'m90', date:'2026-07-04',day:'Sabato 4 Luglio',     phase:'Round of 16', t1:'Vince M73',   t2:'Vince M75',     result:''},
+  {id:'m91', date:'2026-07-05',day:'Domenica 5 Luglio',   phase:'Round of 16', t1:'Vince M76',   t2:'Vince M78',     result:''},
+  {id:'m92', date:'2026-07-05',day:'Domenica 5 Luglio',   phase:'Round of 16', t1:'Vince M79',   t2:'Vince M80',     result:''},
+  {id:'m93', date:'2026-07-06',day:'Lunedì 6 Luglio',     phase:'Round of 16', t1:'Vince M83',   t2:'Vince M84',     result:''},
+  {id:'m94', date:'2026-07-06',day:'Lunedì 6 Luglio',     phase:'Round of 16', t1:'Vince M81',   t2:'Vince M82',     result:''},
+  {id:'m95', date:'2026-07-07',day:'Martedì 7 Luglio',    phase:'Round of 16', t1:'Vince M86',   t2:'Vince M88',     result:''},
+  {id:'m96', date:'2026-07-07',day:'Martedì 7 Luglio',    phase:'Round of 16', t1:'Vince M85',   t2:'Vince M87',     result:''},
+  // ── QUARTI ──
+  {id:'m97', date:'2026-07-09',day:'Giovedì 9 Luglio',    phase:'Quarti di Finale', t1:'Vince M89', t2:'Vince M90', result:''},
+  {id:'m98', date:'2026-07-10',day:'Venerdì 10 Luglio',   phase:'Quarti di Finale', t1:'Vince M93', t2:'Vince M94', result:''},
+  {id:'m99', date:'2026-07-11',day:'Sabato 11 Luglio',    phase:'Quarti di Finale', t1:'Vince M91', t2:'Vince M92', result:''},
+  {id:'m100',date:'2026-07-11',day:'Sabato 11 Luglio',    phase:'Quarti di Finale', t1:'Vince M95', t2:'Vince M96', result:''},
+  // ── SEMIFINALI ──
+  {id:'m101',date:'2026-07-14',day:'Martedì 14 Luglio',   phase:'Semifinale', t1:'Vince M97',   t2:'Vince M98',     result:''},
+  {id:'m102',date:'2026-07-15',day:'Mercoledì 15 Luglio', phase:'Semifinale', t1:'Vince M99',   t2:'Vince M100',    result:''},
+  // ── 3° POSTO ──
+  {id:'m103',date:'2026-07-18',day:'Sabato 18 Luglio',    phase:'Terzo Posto', t1:'Perde M101',  t2:'Perde M102',   result:''},
+  // ── FINALE ──
+  {id:'m104',date:'2026-07-19',day:'Domenica 19 Luglio',  phase:'Finale',      t1:'Vince M101',  t2:'Vince M102',   result:''}
+];
+
+// ── STATO ──
+let scores={};
+let results={};
+try{ const s=localStorage.getItem('fm26_scores'); if(s) scores=JSON.parse(s); }catch(e){}
+try{ const r=localStorage.getItem('fm26_results'); if(r) results=JSON.parse(r); }catch(e){}
+// Applica risultati salvati ai match
+MATCHES.forEach(m=>{ if(results[m.id]!==undefined) m.result=results[m.id]; });
+
+function saveScores(){ try{ localStorage.setItem('fm26_scores',JSON.stringify(scores)); }catch(e){} }
+function saveResults(){ try{ localStorage.setItem('fm26_results',JSON.stringify(results)); }catch(e){} }
+
+function getScore(matchId,playerName){ const k=matchId+'__'+playerName; return scores[k]!==undefined?scores[k]:''; }
+function setScore(matchId,playerName,val){
+  const k=matchId+'__'+playerName;
+  if(val===''||val===null){ delete scores[k]; }else{ scores[k]=parseFloat(val)||0; }
+  saveScores();
+  updateClassificaIfVisible();
+}
+function setResult(matchId,val){
+  const m=MATCHES.find(x=>x.id===matchId);
+  if(m){ m.result=val; results[matchId]=val; saveResults(); }
+}
+
+function calcTeamTotal(team){
+  let t=0;
+  team.players.forEach(p=>{
+    Object.keys(scores).forEach(k=>{
+      if(k.endsWith('__'+p.name)&&typeof scores[k]==='number') t+=scores[k];
+    });
+  });
+  return parseFloat(t.toFixed(2));
+}
+function getRanking(){ return [...TEAMS].sort((a,b)=>calcTeamTotal(b)-calcTeamTotal(a)); }
+
+let currentPage='classifica';
+let expandedMatch=null;
+let calFilter='';
+let calPhase='all';
+
+function nav(page,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  btn.classList.add('active');
+  currentPage=page;
+  if(page==='classifica') renderClassifica();
+  if(page==='calendario') renderCalendario();
+  if(page==='rose') renderRose();
+}
+
+function updateClassificaIfVisible(){
+  if(currentPage==='classifica') renderClassifica();
+}
+
+// ── CLASSIFICA ──
+function renderClassifica(){
+  const ranked=getRanking();
+  const maxTot=calcTeamTotal(ranked[0])||1;
+
+  let html=`<p class="section-title">Classifica</p>
+  <div class="card" style="padding:0.5rem 0.75rem">
+  <table class="rank-table"><thead><tr>
+    <th style="width:36px">#</th>
+    <th style="width:36px"></th>
+    <th>Squadra</th>
+    <th>Voti inseriti</th>
+    <th style="text-align:right">Punti</th>
+    <th style="text-align:right;width:130px">Barre</th>
+  </tr></thead><tbody>`;
+
+  ranked.forEach((t,i)=>{
+    const av=AVATARS[TEAMS.indexOf(t)%AVATARS.length];
+    const tot=calcTeamTotal(t);
+    const pct=Math.max(Math.round((tot/maxTot)*100),2);
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';
+    let nVoti=0;
+    t.players.forEach(p=>{
+      Object.keys(scores).forEach(k=>{ if(k.endsWith('__'+p.name)&&typeof scores[k]==='number') nVoti++; });
+    });
+    html+=`<tr>
+      <td style="text-align:center;font-weight:600">${medal}</td>
+      <td><div class="av" style="background:${av.bg};color:${av.c}">${t.name.substring(0,2).toUpperCase()}</div></td>
+      <td style="font-weight:500">${t.name}</td>
+      <td><span style="font-size:11px;background:var(--bg2);color:var(--text2);padding:2px 8px;border-radius:10px;">${nVoti} voti</span></td>
+      <td style="text-align:right" class="score-green">${tot>0?tot.toFixed(1):'—'}</td>
+      <td style="text-align:right"><div class="bar-mini" style="width:${pct}px"></div></td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div>`;
+
+  // Card top 3
+  if(ranked.some(t=>calcTeamTotal(t)>0)){
+    html+=`<div class="top3-grid">`;
+    ranked.slice(0,3).forEach((t,i)=>{
+      const av=AVATARS[TEAMS.indexOf(t)%AVATARS.length];
+      const tot=calcTeamTotal(t);
+      const playerPts=t.players.map(p=>{
+        let pts=0;
+        Object.keys(scores).forEach(k=>{ if(k.endsWith('__'+p.name)&&typeof scores[k]==='number') pts+=scores[k]; });
+        return {name:p.name,pts};
+      }).filter(x=>x.pts>0).sort((a,b)=>b.pts-a.pts).slice(0,4);
+      html+=`<div class="top3-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div class="av" style="background:${av.bg};color:${av.c}">${t.name.substring(0,2).toUpperCase()}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600">${t.name}</div>
+            <div style="font-size:19px;font-weight:600;color:var(--green)">${tot.toFixed(1)}</div>
+          </div>
+        </div>
+        ${playerPts.map(p=>`
+          <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:0.5px solid var(--border)">
+            <span style="color:var(--text2)">${p.name}</span>
+            <span class="score-green">${p.pts.toFixed(1)}</span>
+          </div>`).join('')}
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  document.getElementById('page-classifica').innerHTML=html;
+}
+
+// ── CALENDARIO ──
+function renderCalendario(){
+  const byDay={};
+  const dayOrder=[];
+  MATCHES.forEach(m=>{
+    if(!byDay[m.day]){ byDay[m.day]=[]; dayOrder.push(m.day); }
+    byDay[m.day].push(m);
+  });
+
+  const phases=['all',...[...new Set(MATCHES.map(m=>m.phase))]];
+
+  let html=`<div class="filter-bar">
+    <input type="text" placeholder="🔍 Cerca nazionale..." value="${calFilter}"
+      oninput="calFilter=this.value;renderCalendario()" style="width:180px"/>
+    <select onchange="calPhase=this.value;renderCalendario()">
+      ${phases.map(p=>`<option value="${p}" ${calPhase===p?'selected':''}>${p==='all'?'Tutte le fasi':p}</option>`).join('')}
+    </select>
+    <span style="font-size:11px;background:var(--bg2);color:var(--text2);padding:2px 10px;border-radius:10px;border:0.5px solid var(--border);">${MATCHES.length} partite</span>
+  </div>
+  <p class="filter-note"><i class="ti ti-info-circle"></i> Clicca su una partita per espanderla e inserire i voti. Solo i giocatori della lega presenti vengono mostrati.</p>`;
+
+  let shown=0;
+  dayOrder.forEach(day=>{
+    const matches=byDay[day].filter(m=>{
+      const phOk=calPhase==='all'||m.phase===calPhase;
+      const srOk=!calFilter||
+        m.t1.toLowerCase().includes(calFilter.toLowerCase())||
+        m.t2.toLowerCase().includes(calFilter.toLowerCase())||
+        m.phase.toLowerCase().includes(calFilter.toLowerCase());
+      return phOk&&srOk;
+    });
+    if(!matches.length) return;
+    shown+=matches.length;
+
+    html+=`<div class="day-block">
+      <div class="day-header">
+        ${day}
+        <span class="day-badge">${matches.length}</span>
+      </div>`;
+
+    matches.forEach(m=>{
+      const players=getPlayersInMatch(m.t1,m.t2);
+      const nScored=players.filter(({player})=>typeof scores[m.id+'__'+player.name]==='number').length;
+      const isExp=expandedMatch===m.id;
+      const hasResult=m.result&&m.result.trim();
+
+      html+=`<div class="match-card${isExp?' expanded':''}" onclick="toggleMatch('${m.id}')">
+        <div class="match-header">
+          <span class="match-group">${m.phase}</span>
+          <span class="match-teams">${m.t1} <span>vs</span> ${m.t2}</span>
+          ${players.length>0?`<span class="match-votes-badge">${nScored}/${players.length} voti</span>`:''}
+          <span class="match-result">${hasResult?m.result:'–'}</span>
+          <i class="ti ti-chevron-${isExp?'up':'down'}" style="color:var(--text2);font-size:14px"></i>
+        </div>`;
+
+      if(isExp){
+        html+=`<div class="match-detail">`;
+        if(players.length===0){
+          html+=`<p class="no-players">Nessun giocatore della lega in questa partita.</p>`;
+        } else {
+          html+=`<div class="detail-head"><div>Giocatore / Nazione</div><div>Squadra fanta</div><div>Voto</div></div>`;
+          players.forEach(({player,team})=>{
+            const sc=getScore(m.id,player.name);
+            html+=`<div class="detail-row">
+              <div>
+                <div style="font-weight:500">${player.name}</div>
+                <div style="font-size:11px;color:var(--text2)">${player.nation}</div>
+              </div>
+              <div style="font-size:12px;color:var(--text2)">${team.name}</div>
+              <div>
+                <input type="number" step="0.5" min="0" max="10" placeholder="—" value="${sc}"
+                  oninput="setScore('${m.id}','${player.name}',this.value)"
+                  onclick="event.stopPropagation()" />
+              </div>
+            </div>`;
+          });
+        }
+        html+=`<div class="result-row">
+          <label>Risultato:</label>
+          <input type="text" placeholder="es. 2-1" value="${m.result||''}"
+            onclick="event.stopPropagation()"
+            onchange="setResult('${m.id}',this.value)" />
+        </div>
+        </div>`;
+      }
+      html+=`</div>`;
+    });
+    html+=`</div>`;
+  });
+
+  if(shown===0) html+=`<div style="text-align:center;padding:3rem;color:var(--text2);font-size:13px">Nessuna partita trovata.</div>`;
+  document.getElementById('page-calendario').innerHTML=html;
+}
+
+function toggleMatch(id){
+  expandedMatch=expandedMatch===id?null:id;
+  renderCalendario();
+}
+
+// ── ROSE ──
+function renderRose(){
+  let html=`<p class="section-title">Rose</p><div class="team-grid">`;
+  TEAMS.forEach((t,i)=>{
+    const av=AVATARS[i%AVATARS.length];
+    const tot=calcTeamTotal(t);
+    html+=`<div class="team-box">
+      <div class="team-box-header">
+        <div class="av" style="background:${av.bg};color:${av.c}">${t.name.substring(0,2).toUpperCase()}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${t.name}</div>
+          <div style="font-size:11px;color:var(--text2)">${t.players.length} giocatori · <span class="score-green">${tot>0?tot.toFixed(1):'0'} pt</span></div>
+        </div>
+      </div>
+      <div class="player-list">`;
+    t.players.forEach(p=>{
+      let pts=0,cnt=0;
+      Object.keys(scores).forEach(k=>{
+        if(k.endsWith('__'+p.name)&&typeof scores[k]==='number'){ pts+=scores[k]; cnt++; }
+      });
+      html+=`<div class="player-item">
+        <div class="pnation">${p.nation}</div>
+        <div style="flex:1;font-size:12px">${p.name}</div>
+        <div style="font-size:11px;${cnt>0?'color:var(--green);font-weight:600':'color:var(--text3)'}">
+          ${cnt>0?pts.toFixed(1):'—'}
+        </div>
+      </div>`;
+    });
+    html+=`</div></div>`;
+  });
+  html+=`</div>`;
+  document.getElementById('page-rose').innerHTML=html;
+}
+
+// Init
+renderClassifica();
+</script>
+</body>
+</html>
