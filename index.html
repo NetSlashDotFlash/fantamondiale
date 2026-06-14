@@ -11,14 +11,13 @@
   --bg:#ffffff;--bg2:#f5f5f3;--bg3:#eeede8;
   --text:#1a1a18;--text2:#6b6b67;--text3:#9d9d99;
   --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
-  --green:#1D9E75;--green-dark:#0F6E56;--green-bg:#E1F5EE;--green-text:#085041;
-  --red:#E24B4A;--rad-md:8px;--rad-lg:12px;
+  --green:#1D9E75;--green-dark:#0F6E56;
+  --rad-md:8px;--rad-lg:12px;
 }
 @media(prefers-color-scheme:dark){:root{
   --bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2c;
   --text:#f0efeb;--text2:#a8a8a4;--text3:#6b6b67;
   --border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.22);
-  --green-bg:#083d2e;--green-text:#9FE1CB;
 }}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;color:var(--text);background:var(--bg3);min-height:100vh}
 .container{max-width:920px;margin:0 auto;padding:1rem}
@@ -26,6 +25,9 @@ header{background:var(--bg);border-bottom:0.5px solid var(--border);padding:.75r
 header .inner{max-width:920px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 header h1{font-size:17px;font-weight:600;flex:1}
 .hbadge{font-size:11px;background:var(--bg2);color:var(--text2);padding:2px 10px;border-radius:20px;border:.5px solid var(--border)}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block;margin-right:4px;transition:background .3s}
+.sync-dot.ok{background:var(--green)}
+.sync-dot.err{background:#E24B4A}
 nav{display:flex;gap:5px}
 nav button{font-size:12px;padding:5px 12px;border-radius:var(--rad-md);border:.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px}
 nav button.active{background:var(--green);color:#fff;border-color:var(--green);font-weight:500}
@@ -33,13 +35,9 @@ nav button:hover:not(.active){background:var(--bg2)}
 .page{display:none;padding-top:1rem}.page.active{display:block}
 .section-title{font-size:16px;font-weight:600;margin-bottom:.875rem}
 .card{background:var(--bg);border:.5px solid var(--border);border-radius:var(--rad-lg);padding:.875rem 1rem;margin-bottom:.75rem}
-
-/* toast */
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--green);color:#fff;padding:8px 18px;border-radius:var(--rad-md);font-size:13px;font-weight:500;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
-
-/* spinner */
-.spinner{text-align:center;padding:2rem;color:var(--text2);font-size:13px}
+.spinner{text-align:center;padding:3rem;color:var(--text2);font-size:13px}
 
 /* classifica */
 .rank-table{width:100%;border-collapse:collapse}
@@ -80,13 +78,11 @@ nav button:hover:not(.active){background:var(--bg2)}
 .result-row label{font-size:12px;color:var(--text2)}
 .result-row input[type=text]{width:80px;font-size:12px;padding:3px 8px;border-radius:var(--rad-md);border:.5px solid var(--border2);background:var(--bg);color:var(--text);font-family:inherit}
 .noplayers{font-size:12px;color:var(--text2);padding:8px 0}
-
-/* dropdown nazionali fase elim */
-.elim-teams{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
-.elim-teams label{font-size:12px;color:var(--text2)}
-.elim-teams select{font-size:12px;padding:4px 8px;border-radius:var(--rad-md);border:.5px solid var(--border2);background:var(--bg);color:var(--text);font-family:inherit}
-.elim-vs{font-size:12px;color:var(--text2);font-weight:500}
-.save-elim-btn{font-size:12px;padding:4px 12px;border-radius:var(--rad-md);background:var(--green);color:#fff;border:none;cursor:pointer;font-family:inherit;font-weight:500}
+.elim-box{background:var(--bg2);border-radius:var(--rad-md);padding:10px 12px;margin-bottom:10px}
+.elim-box label{font-size:11px;color:var(--text2);font-weight:500;display:block;margin-bottom:3px}
+.elim-box select{font-size:12px;padding:4px 8px;border-radius:var(--rad-md);border:.5px solid var(--border2);background:var(--bg);color:var(--text);font-family:inherit;width:100%;margin-bottom:8px}
+.elim-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.save-elim-btn{font-size:12px;padding:5px 14px;border-radius:var(--rad-md);background:var(--green);color:#fff;border:none;cursor:pointer;font-family:inherit;font-weight:500}
 .save-elim-btn:hover{background:var(--green-dark)}
 
 /* rose */
@@ -96,20 +92,18 @@ nav button:hover:not(.active){background:var(--bg2)}
 .pitem{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:.5px solid var(--border);font-size:12px}
 .pitem:last-child{border-bottom:none}
 .pnation{color:var(--text2);font-size:11px;min-width:80px}
-
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 </style>
 </head>
 <body>
-
 <div class="toast" id="toast"></div>
 
 <header>
   <div class="inner">
     <h1>🏆 Fantamondiale 2026</h1>
-    <span class="hbadge">104 partite · 10 squadre</span>
+    <span class="hbadge"><span class="sync-dot" id="sdot"></span><span id="slabel">connessione...</span></span>
     <nav>
       <button class="active" onclick="goPage('classifica',this)"><i class="ti ti-trophy"></i> Classifica</button>
       <button onclick="goPage('calendario',this)"><i class="ti ti-calendar"></i> Calendario</button>
@@ -119,13 +113,29 @@ nav button:hover:not(.active){background:var(--bg2)}
 </header>
 
 <div class="container">
-  <div id="page-classifica" class="page active"></div>
+  <div id="page-classifica" class="page active"><div class="spinner"><i class="ti ti-loader-2"></i> Connessione a Firebase...</div></div>
   <div id="page-calendario" class="page"></div>
   <div id="page-rose" class="page"></div>
 </div>
 
-<script>
-// ── COSTANTI ──
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDbFGWfs973kRym7TZNXZolN9cJx0sdOjY",
+  authDomain: "fantamondiale2026-54495.firebaseapp.com",
+  databaseURL: "https://fantamondiale2026-54495-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "fantamondiale2026-54495",
+  storageBucket: "fantamondiale2026-54495.firebasestorage.app",
+  messagingSenderId: "537587146368",
+  appId: "1:537587146368:web:772a7cee38cd4282f05065"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ── DATI ──
 const AVATARS=[
   {bg:'#E1F5EE',c:'#085041'},{bg:'#E6F1FB',c:'#0C447C'},{bg:'#EEEDFE',c:'#3C3489'},
   {bg:'#FAECE7',c:'#712B13'},{bg:'#FBEAF0',c:'#72243E'},{bg:'#FAEEDA',c:'#633806'},
@@ -133,19 +143,17 @@ const AVATARS=[
   {bg:'#D6EEF5',c:'#0C3D5C'}
 ];
 
-// 48 nazionali partecipanti ai Mondiali 2026
 const ALL_NATIONS=[
   'Algeria','Arabia Saudita','Argentina','Australia','Austria','Belgio','Bosnia',
   'Brasile','Canada','Capo Verde','Cechia','Colombia','Congo RD','Corea del Sud',
   "Costa d'Avorio",'Croazia','Curacao','Ecuador','Egitto','Francia','Germania',
-  'Ghana','Giappone','Giordania','Haiti','Honduras','Indonesia','Inghilterra',
-  'Iran','Iraq','Marocco','Messico','Norvegia','Nuova Zelanda','Olanda','Panama',
-  'Paraguay','Polonia','Portogallo','Qatar','Senegal','Serbia','Slovenia','Scozia',
+  'Ghana','Giappone','Giordania','Haiti','Inghilterra','Iran','Iraq',
+  'Marocco','Messico','Nigeria','Norvegia','Nuova Zelanda','Olanda','Panama',
+  'Paraguay','Polonia','Portogallo','Qatar','Senegal','Scozia',
   'Slovacchia','Spagna','Sudafrica','Svezia','Svizzera','Turchia','Ucraina',
   'Uruguay','USA','Uzbekistan'
 ].sort();
 
-// Rose corrette dal PDF
 const TEAMS=[
   {id:'obizzo',name:'Obizzo',players:[
     {name:'Lautaro',nation:'Argentina'},
@@ -204,7 +212,6 @@ const TEAMS=[
   ]},
   {id:'rione',name:'Rione',players:[
     {name:'Kolasinac',nation:'Bosnia'},
-    
   ]},
   {id:'diegarak',name:'Diegarak',players:[
     {name:'Pasalic',nation:'Croazia'},
@@ -213,7 +220,6 @@ const TEAMS=[
     {name:'Vlasic',nation:'Croazia'},
     {name:'Pongracic',nation:'Croazia'},
     {name:'Nico Paz',nation:'Argentina'},
-    
   ]},
   {id:'marrauderz',name:'Marrauderz',players:[
     {name:'Sulemana',nation:'Ghana'},
@@ -236,25 +242,6 @@ const TEAMS=[
   ]}
 ];
 
-// Lookup nazione → giocatori
-const NATION_MAP={};
-TEAMS.forEach(t=>{
-  t.players.forEach(p=>{
-    const k=p.nation.toLowerCase();
-    if(!NATION_MAP[k])NATION_MAP[k]=[];
-    NATION_MAP[k].push({player:p,team:t});
-  });
-});
-function getPlayersInMatch(n1,n2){
-  const res=[];
-  [n1,n2].forEach(nation=>{
-    (NATION_MAP[nation.toLowerCase()]||[]).forEach(x=>res.push({...x,nation}));
-  });
-  return res;
-}
-
-// ── CALENDARIO ──
-// Le fasi eliminatorie hanno t1/t2 come placeholder; l'admin li sovrascrive
 const MATCHES=[
   {id:'m1', date:'2026-06-11',day:'Giovedì 11 Giugno',   phase:'Girone A', t1:'Messico',        t2:'Sudafrica',     elim:false},
   {id:'m2', date:'2026-06-11',day:'Giovedì 11 Giugno',   phase:'Girone A', t1:'Corea del Sud',  t2:'Cechia',        elim:false},
@@ -328,114 +315,108 @@ const MATCHES=[
   {id:'m70',date:'2026-06-27',day:'Sabato 27 Giugno',    phase:'Girone K', t1:'Congo RD',       t2:'Uzbekistan',    elim:false},
   {id:'m71',date:'2026-06-27',day:'Sabato 27 Giugno',    phase:'Girone J', t1:'Algeria',        t2:'Austria',       elim:false},
   {id:'m72',date:'2026-06-27',day:'Sabato 27 Giugno',    phase:'Girone J', t1:'Giordania',      t2:'Argentina',     elim:false},
-  // ELIMINATORIE — t1/t2 sono placeholder, sovrascrivibili dall'admin
-  {id:'m73', date:'2026-06-28',day:'Dom 28 Giugno',      phase:'Round of 32', t1:'',t2:'',label1:'2ª Gr.A', label2:'2ª Gr.B', elim:true},
-  {id:'m74', date:'2026-06-29',day:'Lun 29 Giugno',      phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.E', label2:'3ª migliore', elim:true},
-  {id:'m75', date:'2026-06-29',day:'Lun 29 Giugno',      phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.F', label2:'2ª Gr.C', elim:true},
-  {id:'m76', date:'2026-06-29',day:'Lun 29 Giugno',      phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.C', label2:'2ª Gr.F', elim:true},
-  {id:'m77', date:'2026-06-30',day:'Mar 30 Giugno',      phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.I', label2:'3ª migliore', elim:true},
-  {id:'m78', date:'2026-06-30',day:'Mar 30 Giugno',      phase:'Round of 32', t1:'',t2:'',label1:'2ª Gr.E', label2:'2ª Gr.I', elim:true},
-  {id:'m79', date:'2026-06-30',day:'Mar 30 Giugno',      phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.A', label2:'3ª migliore', elim:true},
-  {id:'m80', date:'2026-07-01',day:'Mer 1 Luglio',       phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.L', label2:'3ª migliore', elim:true},
-  {id:'m81', date:'2026-07-01',day:'Mer 1 Luglio',       phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.D', label2:'3ª migliore', elim:true},
-  {id:'m82', date:'2026-07-01',day:'Mer 1 Luglio',       phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.G', label2:'3ª migliore', elim:true},
-  {id:'m83', date:'2026-07-02',day:'Gio 2 Luglio',       phase:'Round of 32', t1:'',t2:'',label1:'2ª Gr.K', label2:'2ª Gr.L', elim:true},
-  {id:'m84', date:'2026-07-02',day:'Gio 2 Luglio',       phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.H', label2:'2ª Gr.J', elim:true},
-  {id:'m85', date:'2026-07-02',day:'Gio 2 Luglio',       phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.B', label2:'3ª migliore', elim:true},
-  {id:'m86', date:'2026-07-03',day:'Ven 3 Luglio',       phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.J', label2:'2ª Gr.H', elim:true},
-  {id:'m87', date:'2026-07-03',day:'Ven 3 Luglio',       phase:'Round of 32', t1:'',t2:'',label1:'1ª Gr.K', label2:'3ª migliore', elim:true},
-  {id:'m88', date:'2026-07-03',day:'Ven 3 Luglio',       phase:'Round of 32', t1:'',t2:'',label1:'2ª Gr.D', label2:'2ª Gr.G', elim:true},
-  {id:'m89', date:'2026-07-04',day:'Sab 4 Luglio',       phase:'Round of 16', t1:'',t2:'',label1:'Vince M74', label2:'Vince M77', elim:true},
-  {id:'m90', date:'2026-07-04',day:'Sab 4 Luglio',       phase:'Round of 16', t1:'',t2:'',label1:'Vince M73', label2:'Vince M75', elim:true},
-  {id:'m91', date:'2026-07-05',day:'Dom 5 Luglio',       phase:'Round of 16', t1:'',t2:'',label1:'Vince M76', label2:'Vince M78', elim:true},
-  {id:'m92', date:'2026-07-05',day:'Dom 5 Luglio',       phase:'Round of 16', t1:'',t2:'',label1:'Vince M79', label2:'Vince M80', elim:true},
-  {id:'m93', date:'2026-07-06',day:'Lun 6 Luglio',       phase:'Round of 16', t1:'',t2:'',label1:'Vince M83', label2:'Vince M84', elim:true},
-  {id:'m94', date:'2026-07-06',day:'Lun 6 Luglio',       phase:'Round of 16', t1:'',t2:'',label1:'Vince M81', label2:'Vince M82', elim:true},
-  {id:'m95', date:'2026-07-07',day:'Mar 7 Luglio',       phase:'Round of 16', t1:'',t2:'',label1:'Vince M86', label2:'Vince M88', elim:true},
-  {id:'m96', date:'2026-07-07',day:'Mar 7 Luglio',       phase:'Round of 16', t1:'',t2:'',label1:'Vince M85', label2:'Vince M87', elim:true},
-  {id:'m97', date:'2026-07-09',day:'Gio 9 Luglio',       phase:'Quarti di Finale', t1:'',t2:'',label1:'Vince M89', label2:'Vince M90', elim:true},
-  {id:'m98', date:'2026-07-10',day:'Ven 10 Luglio',      phase:'Quarti di Finale', t1:'',t2:'',label1:'Vince M93', label2:'Vince M94', elim:true},
-  {id:'m99', date:'2026-07-11',day:'Sab 11 Luglio',      phase:'Quarti di Finale', t1:'',t2:'',label1:'Vince M91', label2:'Vince M92', elim:true},
-  {id:'m100',date:'2026-07-11',day:'Sab 11 Luglio',      phase:'Quarti di Finale', t1:'',t2:'',label1:'Vince M95', label2:'Vince M96', elim:true},
-  {id:'m101',date:'2026-07-14',day:'Mar 14 Luglio',      phase:'Semifinale',       t1:'',t2:'',label1:'Vince M97', label2:'Vince M98', elim:true},
-  {id:'m102',date:'2026-07-15',day:'Mer 15 Luglio',      phase:'Semifinale',       t1:'',t2:'',label1:'Vince M99', label2:'Vince M100', elim:true},
-  {id:'m103',date:'2026-07-18',day:'Sab 18 Luglio',      phase:'Terzo Posto',      t1:'',t2:'',label1:'Perde M101', label2:'Perde M102', elim:true},
-  {id:'m104',date:'2026-07-19',day:'Dom 19 Luglio',      phase:'Finale',           t1:'',t2:'',label1:'Vince M101', label2:'Vince M102', elim:true},
+  {id:'m73', date:'2026-06-28',day:'Dom 28 Giugno',      phase:'Round of 32', elim:true, t1:'',t2:'',label1:'2ª Gr.A',   label2:'2ª Gr.B'},
+  {id:'m74', date:'2026-06-29',day:'Lun 29 Giugno',      phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.E',   label2:'3ª migliore'},
+  {id:'m75', date:'2026-06-29',day:'Lun 29 Giugno',      phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.F',   label2:'2ª Gr.C'},
+  {id:'m76', date:'2026-06-29',day:'Lun 29 Giugno',      phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.C',   label2:'2ª Gr.F'},
+  {id:'m77', date:'2026-06-30',day:'Mar 30 Giugno',      phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.I',   label2:'3ª migliore'},
+  {id:'m78', date:'2026-06-30',day:'Mar 30 Giugno',      phase:'Round of 32', elim:true, t1:'',t2:'',label1:'2ª Gr.E',   label2:'2ª Gr.I'},
+  {id:'m79', date:'2026-06-30',day:'Mar 30 Giugno',      phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.A',   label2:'3ª migliore'},
+  {id:'m80', date:'2026-07-01',day:'Mer 1 Luglio',       phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.L',   label2:'3ª migliore'},
+  {id:'m81', date:'2026-07-01',day:'Mer 1 Luglio',       phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.D',   label2:'3ª migliore'},
+  {id:'m82', date:'2026-07-01',day:'Mer 1 Luglio',       phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.G',   label2:'3ª migliore'},
+  {id:'m83', date:'2026-07-02',day:'Gio 2 Luglio',       phase:'Round of 32', elim:true, t1:'',t2:'',label1:'2ª Gr.K',   label2:'2ª Gr.L'},
+  {id:'m84', date:'2026-07-02',day:'Gio 2 Luglio',       phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.H',   label2:'2ª Gr.J'},
+  {id:'m85', date:'2026-07-02',day:'Gio 2 Luglio',       phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.B',   label2:'3ª migliore'},
+  {id:'m86', date:'2026-07-03',day:'Ven 3 Luglio',       phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.J',   label2:'2ª Gr.H'},
+  {id:'m87', date:'2026-07-03',day:'Ven 3 Luglio',       phase:'Round of 32', elim:true, t1:'',t2:'',label1:'1ª Gr.K',   label2:'3ª migliore'},
+  {id:'m88', date:'2026-07-03',day:'Ven 3 Luglio',       phase:'Round of 32', elim:true, t1:'',t2:'',label1:'2ª Gr.D',   label2:'2ª Gr.G'},
+  {id:'m89', date:'2026-07-04',day:'Sab 4 Luglio',       phase:'Round of 16', elim:true, t1:'',t2:'',label1:'Vince M74', label2:'Vince M77'},
+  {id:'m90', date:'2026-07-04',day:'Sab 4 Luglio',       phase:'Round of 16', elim:true, t1:'',t2:'',label1:'Vince M73', label2:'Vince M75'},
+  {id:'m91', date:'2026-07-05',day:'Dom 5 Luglio',       phase:'Round of 16', elim:true, t1:'',t2:'',label1:'Vince M76', label2:'Vince M78'},
+  {id:'m92', date:'2026-07-05',day:'Dom 5 Luglio',       phase:'Round of 16', elim:true, t1:'',t2:'',label1:'Vince M79', label2:'Vince M80'},
+  {id:'m93', date:'2026-07-06',day:'Lun 6 Luglio',       phase:'Round of 16', elim:true, t1:'',t2:'',label1:'Vince M83', label2:'Vince M84'},
+  {id:'m94', date:'2026-07-06',day:'Lun 6 Luglio',       phase:'Round of 16', elim:true, t1:'',t2:'',label1:'Vince M81', label2:'Vince M82'},
+  {id:'m95', date:'2026-07-07',day:'Mar 7 Luglio',       phase:'Round of 16', elim:true, t1:'',t2:'',label1:'Vince M86', label2:'Vince M88'},
+  {id:'m96', date:'2026-07-07',day:'Mar 7 Luglio',       phase:'Round of 16', elim:true, t1:'',t2:'',label1:'Vince M85', label2:'Vince M87'},
+  {id:'m97', date:'2026-07-09',day:'Gio 9 Luglio',       phase:'Quarti di Finale', elim:true, t1:'',t2:'',label1:'Vince M89', label2:'Vince M90'},
+  {id:'m98', date:'2026-07-10',day:'Ven 10 Luglio',      phase:'Quarti di Finale', elim:true, t1:'',t2:'',label1:'Vince M93', label2:'Vince M94'},
+  {id:'m99', date:'2026-07-11',day:'Sab 11 Luglio',      phase:'Quarti di Finale', elim:true, t1:'',t2:'',label1:'Vince M91', label2:'Vince M92'},
+  {id:'m100',date:'2026-07-11',day:'Sab 11 Luglio',      phase:'Quarti di Finale', elim:true, t1:'',t2:'',label1:'Vince M95', label2:'Vince M96'},
+  {id:'m101',date:'2026-07-14',day:'Mar 14 Luglio',      phase:'Semifinale',       elim:true, t1:'',t2:'',label1:'Vince M97', label2:'Vince M98'},
+  {id:'m102',date:'2026-07-15',day:'Mer 15 Luglio',      phase:'Semifinale',       elim:true, t1:'',t2:'',label1:'Vince M99', label2:'Vince M100'},
+  {id:'m103',date:'2026-07-18',day:'Sab 18 Luglio',      phase:'Terzo Posto',      elim:true, t1:'',t2:'',label1:'Perde M101',label2:'Perde M102'},
+  {id:'m104',date:'2026-07-19',day:'Dom 19 Luglio',      phase:'Finale',           elim:true, t1:'',t2:'',label1:'Vince M101',label2:'Vince M102'},
 ];
 
-// ── STORAGE CONDIVISO (Anthropic Artifact Storage) ──
-// Tutti i dati sono salvati in shared storage → visibili a tutti
-let scores={};    // matchId__playerName → voto
-let results={};   // matchId → risultato stringa
-let elimTeams={}; // matchId → {t1, t2}
-
-async function loadAll(){
-  try{
-    const s=await window.storage.get('fm26_scores',true);
-    if(s)scores=JSON.parse(s.value);
-  }catch(e){scores={};}
-  try{
-    const r=await window.storage.get('fm26_results',true);
-    if(r)results=JSON.parse(r.value);
-  }catch(e){results={};}
-  try{
-    const e=await window.storage.get('fm26_elim',true);
-    if(e)elimTeams=JSON.parse(e.value);
-  }catch(e){elimTeams={};}
-  // applica elim teams ai match
-  MATCHES.forEach(m=>{
-    if(m.elim&&elimTeams[m.id]){
-      m.t1=elimTeams[m.id].t1||'';
-      m.t2=elimTeams[m.id].t2||'';
-    }
-  });
+// Lookup nazione → {player, team}
+const NATION_MAP={};
+TEAMS.forEach(t=>t.players.forEach(p=>{
+  const k=p.nation.toLowerCase();
+  if(!NATION_MAP[k])NATION_MAP[k]=[];
+  NATION_MAP[k].push({player:p,team:t});
+}));
+function getPlayersInMatch(n1,n2){
+  const res=[];
+  [n1,n2].forEach(n=>(NATION_MAP[n.toLowerCase()]||[]).forEach(x=>res.push({...x})));
+  return res;
 }
 
-async function saveScores(){
-  try{await window.storage.set('fm26_scores',JSON.stringify(scores),true);}catch(e){}
-}
-async function saveResults(){
-  try{await window.storage.set('fm26_results',JSON.stringify(results),true);}catch(e){}
-}
-async function saveElim(){
-  try{await window.storage.set('fm26_elim',JSON.stringify(elimTeams),true);}catch(e){}
+// ── STATO (da Firebase) ──
+let scores={};
+let results={};
+let elimTeams={};
+
+// ── FIREBASE LISTENERS ──
+function setSyncStatus(ok){
+  const dot=document.getElementById('sdot');
+  const lbl=document.getElementById('slabel');
+  if(!dot)return;
+  dot.className='sync-dot '+(ok?'ok':'err');
+  lbl.textContent=ok?'sincronizzato':'errore connessione';
 }
 
+onValue(ref(db,'scores'), snap=>{ scores=snap.val()||{}; if(currentPage==='classifica')renderClassifica(); setSyncStatus(true); }, ()=>setSyncStatus(false));
+onValue(ref(db,'results'), snap=>{ results=snap.val()||{}; if(currentPage==='calendario')renderCalendario(); });
+onValue(ref(db,'elim'), snap=>{
+  elimTeams=snap.val()||{};
+  MATCHES.forEach(m=>{ if(m.elim&&elimTeams[m.id]){ m.t1=elimTeams[m.id].t1||''; m.t2=elimTeams[m.id].t2||''; } });
+  if(currentPage==='calendario')renderCalendario();
+});
+
+// ── SALVATAGGIO ──
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-function getScore(mid,pname){ const k=mid+'__'+pname; return scores[k]!==undefined?scores[k]:''; }
+function safeKey(s){ return s.replace(/[.#$/\[\]]/g,'_'); }
+
 async function setScore(mid,pname,val){
-  const k=mid+'__'+pname;
-  if(val===''||val===null){delete scores[k];}else{scores[k]=parseFloat(val)||0;}
-  await saveScores();
-  if(currentPage==='classifica')renderClassifica();
+  const k=safeKey(mid+'__'+pname);
+  const updates={};
+  if(val===''){ updates['scores/'+k]=null; }
+  else{ updates['scores/'+k]=parseFloat(val)||0; }
+  await update(ref(db),updates);
 }
 async function setResult(mid,val){
-  results[mid]=val;
-  await saveResults();
+  await set(ref(db,'results/'+mid), val||null);
+  showToast('Risultato salvato ✓');
 }
 async function setElimTeams(mid,t1,t2){
-  elimTeams[mid]={t1,t2};
-  const m=MATCHES.find(x=>x.id===mid);
-  if(m){m.t1=t1;m.t2=t2;}
-  await saveElim();
+  await set(ref(db,'elim/'+mid),{t1,t2});
   showToast('Squadre salvate ✓');
-  renderCalendario();
 }
 
 // ── CALCOLI ──
 function calcTeamTotal(team){
-  let t=0;
+  let tot=0;
   team.players.forEach(p=>{
-    Object.keys(scores).forEach(k=>{
-      if(k.endsWith('__'+p.name)&&typeof scores[k]==='number') t+=scores[k];
-    });
+    const k=safeKey('__'+p.name);
+    Object.keys(scores).forEach(sk=>{ if(sk.endsWith(k)&&typeof scores[sk]==='number') tot+=scores[sk]; });
   });
-  return parseFloat(t.toFixed(2));
+  return parseFloat(tot.toFixed(2));
 }
 function getRanking(){ return [...TEAMS].sort((a,b)=>calcTeamTotal(b)-calcTeamTotal(a)); }
 
@@ -445,7 +426,7 @@ let expandedMatch=null;
 let calFilter='';
 let calPhase='all';
 
-function goPage(page,btn){
+window.goPage=function(page,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
@@ -454,7 +435,7 @@ function goPage(page,btn){
   if(page==='classifica')renderClassifica();
   if(page==='calendario')renderCalendario();
   if(page==='rose')renderRose();
-}
+};
 
 // ── CLASSIFICA ──
 function renderClassifica(){
@@ -474,7 +455,11 @@ function renderClassifica(){
     const pct=Math.max(Math.round((tot/maxTot)*120),3);
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';
     let nv=0;
-    t.players.forEach(p=>{ Object.keys(scores).forEach(k=>{ if(k.endsWith('__'+p.name)&&typeof scores[k]==='number')nv++; }); });
+    const k=safeKey('__');
+    team_score_count: for(const p of t.players){
+      const pk=safeKey('__'+p.name);
+      for(const sk of Object.keys(scores)){ if(sk.endsWith(pk)&&typeof scores[sk]==='number')nv++; }
+    }
     html+=`<tr>
       <td style="text-align:center;font-weight:600">${medal}</td>
       <td><div class="av" style="background:${av.bg};color:${av.c}">${t.name.substring(0,2).toUpperCase()}</div></td>
@@ -485,16 +470,16 @@ function renderClassifica(){
     </tr>`;
   });
   html+=`</tbody></table></div>`;
-
   const withPts=ranked.filter(t=>calcTeamTotal(t)>0);
-  if(withPts.length>0){
+  if(withPts.length){
     html+=`<div class="top3">`;
     withPts.slice(0,3).forEach(t=>{
       const av=AVATARS[TEAMS.indexOf(t)%AVATARS.length];
       const tot=calcTeamTotal(t);
       const best=t.players.map(p=>{
         let pts=0;
-        Object.keys(scores).forEach(k=>{ if(k.endsWith('__'+p.name)&&typeof scores[k]==='number')pts+=scores[k]; });
+        const pk=safeKey('__'+p.name);
+        Object.keys(scores).forEach(sk=>{ if(sk.endsWith(pk)&&typeof scores[sk]==='number')pts+=scores[sk]; });
         return {name:p.name,pts};
       }).filter(x=>x.pts>0).sort((a,b)=>b.pts-a.pts).slice(0,4);
       html+=`<div class="top3-card">
@@ -515,24 +500,22 @@ function renderClassifica(){
 
 // ── CALENDARIO ──
 const nations_opts=ALL_NATIONS.map(n=>`<option value="${n}">${n}</option>`).join('');
-function nationSelect(id,val,slot){
-  return `<select onchange="elimChange('${id}','${slot}',this.value)" onclick="event.stopPropagation()">
-    <option value="">— scegli —</option>${nations_opts.replace(`value="${val}"`,`value="${val}" selected`)}
-  </select>`;
-}
+let elimPending={};
 
-let elimPending={}; // matchId → {t1,t2} temporaneo prima del salvataggio
-function elimChange(mid,slot,val){
-  if(!elimPending[mid])elimPending[mid]={t1:'',t2:''};
+window.elimChange=function(mid,slot,val){
+  if(!elimPending[mid])elimPending[mid]={t1:null,t2:null};
   elimPending[mid][slot]=val;
-}
-function confirmElim(mid){
-  const pend=elimPending[mid]||{};
+};
+window.confirmElim=async function(mid){
   const m=MATCHES.find(x=>x.id===mid);
-  const t1=pend.t1!==undefined?pend.t1:(m?m.t1:'');
-  const t2=pend.t2!==undefined?pend.t2:(m?m.t2:'');
-  setElimTeams(mid,t1,t2);
-}
+  const pend=elimPending[mid]||{};
+  const t1=pend.t1!==null?pend.t1:(m?m.t1:'');
+  const t2=pend.t2!==null?pend.t2:(m?m.t2:'');
+  await setElimTeams(mid,t1,t2);
+};
+window.setScore=setScore;
+window.setResult=setResult;
+window.toggleMatch=function(id){ expandedMatch=expandedMatch===id?null:id; renderCalendario(); };
 
 function renderCalendario(){
   const byDay={};const dayOrder=[];
@@ -547,64 +530,62 @@ function renderCalendario(){
     </select>
     <span style="font-size:11px;background:var(--bg2);color:var(--text2);padding:2px 10px;border-radius:10px;border:.5px solid var(--border)">${MATCHES.length} partite</span>
   </div>
-  <p class="fnote"><i class="ti ti-info-circle"></i> Clicca su una partita per espandere. Per le fasi eliminatorie scegli le nazionali qualificate dal menu.</p>`;
+  <p class="fnote"><i class="ti ti-info-circle"></i> Clicca su una partita per espandere e inserire voti. Per le eliminatorie scegli le nazionali qualificate.</p>`;
 
   dayOrder.forEach(day=>{
-    const matches=byDay[day].filter(m=>{
+    const ms=byDay[day].filter(m=>{
       const phOk=calPhase==='all'||m.phase===calPhase;
-      const label1=m.elim?(m.label1||''):'';
-      const label2=m.elim?(m.label2||''):'';
-      const srOk=!calFilter||
-        (m.t1||'').toLowerCase().includes(calFilter.toLowerCase())||
-        (m.t2||'').toLowerCase().includes(calFilter.toLowerCase())||
-        m.phase.toLowerCase().includes(calFilter.toLowerCase())||
-        label1.toLowerCase().includes(calFilter.toLowerCase())||
-        label2.toLowerCase().includes(calFilter.toLowerCase());
+      const srOk=!calFilter||[m.t1,m.t2,m.label1||'',m.label2||'',m.phase].some(s=>s.toLowerCase().includes(calFilter.toLowerCase()));
       return phOk&&srOk;
     });
-    if(!matches.length)return;
-
-    html+=`<div class="day-block">
-      <div class="day-header">${day}<span class="day-badge">${matches.length}</span></div>`;
-
-    matches.forEach(m=>{
+    if(!ms.length)return;
+    html+=`<div class="day-block"><div class="day-header">${day}<span class="day-badge">${ms.length}</span></div>`;
+    ms.forEach(m=>{
       const isExp=expandedMatch===m.id;
-      const hasResult=results[m.id]&&results[m.id].trim();
+      const res=results[m.id]||'';
       const displayT1=m.t1||(m.label1||'?');
       const displayT2=m.t2||(m.label2||'?');
       const players=m.t1&&m.t2?getPlayersInMatch(m.t1,m.t2):[];
-      const nScored=players.filter(({player})=>typeof scores[m.id+'__'+player.name]==='number').length;
+      let nScored=0;
+      players.forEach(({player})=>{ const k=safeKey(m.id+'__'+player.name); if(typeof scores[k]==='number')nScored++; });
 
       html+=`<div class="match-card${isExp?' expanded':''}" onclick="toggleMatch('${m.id}')">
         <div class="match-header">
           <span class="mphase">${m.phase}</span>
           <span class="mteams">${displayT1} <span>vs</span> ${displayT2}</span>
-          ${players.length>0?`<span class="mvbadge">${nScored}/${players.length} voti</span>`:''}
-          <span class="mresult">${hasResult?results[m.id]:'–'}</span>
+          ${players.length>0?`<span class="mvbadge">${nScored}/${players.length}</span>`:''}
+          <span class="mresult">${res||'–'}</span>
           <i class="ti ti-chevron-${isExp?'up':'down'}" style="color:var(--text2);font-size:14px"></i>
         </div>`;
 
       if(isExp){
         html+=`<div class="match-detail">`;
-        // Se eliminatoria → mostra dropdown selezione nazioni
         if(m.elim){
-          html+=`<div class="elim-teams">
-            <label>Squadra 1 (${m.label1||'?'}):</label>
-            ${nationSelect(m.id,m.t1||'','t1')}
-            <span class="elim-vs">vs</span>
-            <label>Squadra 2 (${m.label2||'?'}):</label>
-            ${nationSelect(m.id,m.t2||'','t2')}
-            <button class="save-elim-btn" onclick="event.stopPropagation();confirmElim('${m.id}')">Conferma</button>
+          html+=`<div class="elim-box">
+            <div class="elim-row">
+              <div>
+                <label>${m.label1||'Squadra 1'}</label>
+                <select onchange="elimChange('${m.id}','t1',this.value)" onclick="event.stopPropagation()">
+                  <option value="">— scegli —</option>${nations_opts.replace(`value="${m.t1}"`,`value="${m.t1}" selected`)}
+                </select>
+              </div>
+              <div>
+                <label>${m.label2||'Squadra 2'}</label>
+                <select onchange="elimChange('${m.id}','t2',this.value)" onclick="event.stopPropagation()">
+                  <option value="">— scegli —</option>${nations_opts.replace(`value="${m.t2}"`,`value="${m.t2}" selected`)}
+                </select>
+              </div>
+            </div>
+            <button class="save-elim-btn" onclick="event.stopPropagation();confirmElim('${m.id}')"><i class="ti ti-check"></i> Conferma squadre</button>
           </div>`;
         }
-
-        // Giocatori
         if(players.length===0){
           html+=`<p class="noplayers">${m.elim?'Seleziona le nazionali sopra per vedere i giocatori della lega.':'Nessun giocatore della lega in questa partita.'}</p>`;
         } else {
-          html+=`<div class="dhead"><div>Giocatore / Nazione</div><div>Squadra fanta</div><div>Voto</div></div>`;
+          html+=`<div class="dhead"><div>Giocatore</div><div>Squadra fanta</div><div>Voto</div></div>`;
           players.forEach(({player,team})=>{
-            const sc=getScore(m.id,player.name);
+            const k=safeKey(m.id+'__'+player.name);
+            const sc=typeof scores[k]==='number'?scores[k]:'';
             html+=`<div class="drow">
               <div><div style="font-weight:500">${player.name}</div>
               <div style="font-size:11px;color:var(--text2)">${player.nation}</div></div>
@@ -615,23 +596,20 @@ function renderCalendario(){
             </div>`;
           });
         }
-
         html+=`<div class="result-row">
           <label>Risultato:</label>
-          <input type="text" placeholder="es. 2-1" value="${results[m.id]||''}"
+          <input type="text" placeholder="es. 2-1" value="${res}"
             onclick="event.stopPropagation()"
-            onchange="setResult('${m.id}',this.value);showToast('Salvato ✓')" />
+            onchange="setResult('${m.id}',this.value)"/>
         </div></div>`;
       }
       html+=`</div>`;
     });
     html+=`</div>`;
   });
-
   document.getElementById('page-calendario').innerHTML=html;
 }
-
-function toggleMatch(id){ expandedMatch=expandedMatch===id?null:id; renderCalendario(); }
+window.renderCalendario=renderCalendario;
 
 // ── ROSE ──
 function renderRose(){
@@ -647,16 +625,17 @@ function renderRose(){
           <div style="font-size:11px;color:var(--text2)">${t.players.length} giocatori · <span class="green">${tot>0?tot.toFixed(1):'0'} pt</span></div>
         </div>
       </div><div>`;
-    if(t.players.length===0){
-      html+=`<div style="font-size:12px;color:var(--text2);padding:6px 0">Nessun giocatore inserito</div>`;
+    if(!t.players.length){
+      html+=`<div style="font-size:12px;color:var(--text2);padding:6px 0">Nessun giocatore</div>`;
     } else {
       t.players.forEach(p=>{
         let pts=0,cnt=0;
-        Object.keys(scores).forEach(k=>{ if(k.endsWith('__'+p.name)&&typeof scores[k]==='number'){pts+=scores[k];cnt++;} });
+        const pk=safeKey('__'+p.name);
+        Object.keys(scores).forEach(sk=>{ if(sk.endsWith(pk)&&typeof scores[sk]==='number'){pts+=scores[sk];cnt++;} });
         html+=`<div class="pitem">
           <div class="pnation">${p.nation}</div>
           <div style="flex:1">${p.name}</div>
-          <div style="font-size:11px;${cnt>0?'color:var(--green);font-weight:600':'color:var(--text3)'}">${cnt>0?pts.toFixed(1):'—'}</div>
+          <div style="font-size:11px;${cnt?'color:var(--green);font-weight:600':'color:var(--text3)'}">${cnt?pts.toFixed(1):'—'}</div>
         </div>`;
       });
     }
@@ -666,13 +645,7 @@ function renderRose(){
   document.getElementById('page-rose').innerHTML=html;
 }
 
-// ── INIT ──
-async function init(){
-  document.getElementById('page-classifica').innerHTML=`<div class="spinner"><i class="ti ti-loader-2"></i> Caricamento dati condivisi...</div>`;
-  await loadAll();
-  renderClassifica();
-}
-init();
+// init — classifica si aggiorna automaticamente via onValue
 </script>
 </body>
 </html>
