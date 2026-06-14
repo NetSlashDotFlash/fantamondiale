@@ -38,6 +38,7 @@ nav button:hover:not(.active){background:var(--bg2)}
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--green);color:#fff;padding:8px 18px;border-radius:var(--rad-md);font-size:13px;font-weight:500;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
 .spinner{text-align:center;padding:3rem;color:var(--text2);font-size:13px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* classifica */
 .rank-table{width:100%;border-collapse:collapse}
@@ -109,6 +110,7 @@ nav button:hover:not(.active){background:var(--bg2)}
       <button onclick="goPage('calendario',this)"><i class="ti ti-calendar"></i> Calendario</button>
       <button onclick="goPage('rose',this)"><i class="ti ti-users"></i> Rose</button>
     </nav>
+    <button id="sync-btn" onclick="syncResults()" style="font-size:12px;padding:4px 12px;border-radius:8px;background:transparent;border:0.5px solid rgba(0,0,0,0.22);color:#6b6b67;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="ti ti-refresh" id="sync-icon"></i> Sincronizza</button>
   </div>
 </header>
 
@@ -644,6 +646,120 @@ function renderRose(){
   html+=`</div>`;
   document.getElementById('page-rose').innerHTML=html;
 }
+
+
+// ── FOOTBALL-DATA.ORG SYNC ──
+const FD_TOKEN = 'e74a28fac1c543c38628c5246bbc9a7b';
+const WC_ID = 2000; // FIFA World Cup
+
+// Mappa nomi API (inglese) → nomi italiani usati nel file
+const NATION_API_MAP = {
+  'Mexico':'Messico','South Africa':'Sudafrica','South Korea':'Corea del Sud',
+  'Czech Republic':'Cechia','Czechia':'Cechia','Canada':'Canada','Bosnia and Herzegovina':'Bosnia',
+  'United States':'USA','Paraguay':'Paraguay','Qatar':'Qatar','Switzerland':'Svizzera',
+  'Brazil':'Brasile','Morocco':'Marocco','Haiti':'Haiti','Scotland':'Scozia',
+  'Australia':'Australia','Turkey':'Turchia','Germany':'Germania','Curaçao':'Curacao',
+  'Netherlands':'Olanda','Japan':'Giappone',"Côte d'Ivoire":"Costa d'Avorio",
+  'Ecuador':'Ecuador','Sweden':'Svezia','Tunisia':'Tunisia','Spain':'Spagna',
+  'Cape Verde':'Capo Verde','Belgium':'Belgio','Egypt':'Egitto',
+  'Saudi Arabia':'Arabia Saudita','Uruguay':'Uruguay','Iran':'Iran',
+  'New Zealand':'Nuova Zelanda','France':'Francia','Senegal':'Senegal',
+  'Iraq':'Iraq','Argentina':'Argentina','Algeria':'Algeria','Austria':'Austria',
+  'Jordan':'Giordania','Portugal':'Portogallo','DR Congo':'Congo RD',
+  'England':'Inghilterra','Croatia':'Croazia','Ghana':'Ghana','Panama':'Panama',
+  'Uzbekistan':'Uzbekistan','Colombia':'Colombia','Serbia':'Serbia',
+  'Slovenia':'Slovenia','Indonesia':'Indonesia','Honduras':'Honduras',
+  'Norway':'Norvegia','Poland':'Polonia','Slovakia':'Slovacchia',
+  'Ukraine':'Ucraina','Nigeria':'Nigeria'
+};
+
+function apiToIt(name){ return NATION_API_MAP[name]||name; }
+
+// Mappa partita locale → partita API tramite le squadre
+function matchApiToLocal(homeIt, awayIt){
+  return MATCHES.find(m=>
+    !m.elim &&
+    m.t1.toLowerCase()===homeIt.toLowerCase() &&
+    m.t2.toLowerCase()===awayIt.toLowerCase()
+  ) || MATCHES.find(m=>
+    !m.elim &&
+    m.t1.toLowerCase()===awayIt.toLowerCase() &&
+    m.t2.toLowerCase()===homeIt.toLowerCase()
+  );
+}
+
+window.syncResults = async function(){
+  const btn = document.getElementById('sync-btn');
+  const icon = document.getElementById('sync-icon');
+  btn.style.opacity='0.6'; btn.style.pointerEvents='none';
+  icon.style.animation='spin .8s linear infinite';
+  showToast('Sincronizzazione in corso...');
+
+  try {
+    // Rispetta throttling: leggi header X-RequestsAvailable
+    const resp = await fetch(`https://api.football-data.org/v4/competitions/${WC_ID}/matches`, {
+      headers: { 'X-Auth-Token': FD_TOKEN }
+    });
+
+    if(!resp.ok){ throw new Error(`API error: ${resp.status}`); }
+
+    const remaining = resp.headers.get('X-RequestsAvailable');
+    if(remaining && parseInt(remaining) < 5){
+      showToast('Rate limit quasi raggiunto, riprova tra poco');
+      return;
+    }
+
+    const data = await resp.json();
+    const matches = data.matches || [];
+    let updated = 0;
+
+    const fbUpdates = {};
+
+    for(const am of matches){
+      const status = am.status; // FINISHED, IN_PLAY, TIMED, etc.
+      if(status !== 'FINISHED') continue;
+
+      const homeIt = apiToIt(am.homeTeam?.name || '');
+      const awayIt = apiToIt(am.awayTeam?.name || '');
+      const homeScore = am.score?.fullTime?.home;
+      const awayScore = am.score?.fullTime?.away;
+
+      if(homeScore === null || homeScore === undefined) continue;
+
+      const local = matchApiToLocal(homeIt, awayIt);
+      if(!local) continue;
+
+      // Il risultato: se squadre nell'ordine giusto o invertito
+      let resStr;
+      if(local.t1.toLowerCase()===homeIt.toLowerCase()){
+        resStr = `${homeScore}-${awayScore}`;
+      } else {
+        resStr = `${awayScore}-${homeScore}`;
+      }
+
+      // Salva solo se diverso da quello già salvato
+      if((results[local.id]||'') !== resStr){
+        fbUpdates[`results/${local.id}`] = resStr;
+        updated++;
+      }
+    }
+
+    if(Object.keys(fbUpdates).length > 0){
+      await update(ref(db), fbUpdates);
+      showToast(`✓ ${updated} risultati aggiornati`);
+    } else {
+      showToast('Nessun nuovo risultato da aggiornare');
+    }
+
+  } catch(e){
+    console.error(e);
+    showToast('Errore sincronizzazione: '+e.message);
+  } finally {
+    btn.style.opacity=''; btn.style.pointerEvents='';
+    icon.style.animation='';
+  }
+};
+
 
 // init — classifica si aggiorna automaticamente via onValue
 </script>
