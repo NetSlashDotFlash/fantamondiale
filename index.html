@@ -628,6 +628,7 @@ function renderCalendario(){
     faseEl.value='all'; calPhase='all';
   }
 
+  let html='';
   dayOrder.forEach(day=>{
     const ms=byDay[day].filter(m=>{
       const searchTerms=[m.t1||'', m.t2||'', m.label1||'', m.label2||'', m.phase||''];
