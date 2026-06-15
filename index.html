@@ -558,33 +558,58 @@ window.toggleMatch=function(id){ expandedMatch=expandedMatch===id?null:id; rende
 function renderCalendario(){
   const byDay={};const dayOrder=[];
   MATCHES.forEach(m=>{ if(!byDay[m.day]){byDay[m.day]=[];dayOrder.push(m.day);} byDay[m.day].push(m); });
-  const phases=['all',...new Set(MATCHES.map(m=>m.phase))];
+
+  // Filtro turno e fase sono INDIPENDENTI: turno filtra per giornata gironi o elim,
+  // fase filtra per singolo girone/round. Se si sceglie un turno, fase torna a 'all'
+  const gironePhases=['all','Girone A','Girone B','Girone C','Girone D','Girone E','Girone F',
+    'Girone G','Girone H','Girone I','Girone J','Girone K','Girone L'];
+  const elimPhases=['Round of 32','Round of 16','Quarti di Finale','Semifinale','Terzo Posto','Finale'];
+  const showingElim = calTurno==='elim';
+  const showingGironi = calTurno!=='elim';
+
+  // Opzioni fase dipendono dal turno selezionato
+  let phaseOpts='';
+  if(showingElim){
+    phaseOpts=`<option value="all" ${calPhase==='all'?'selected':''}>Tutte le fasi elim.</option>`;
+    elimPhases.forEach(p=>{ phaseOpts+=`<option value="${p}" ${calPhase===p?'selected':''}>${p}</option>`; });
+  } else {
+    phaseOpts=`<option value="all" ${calPhase==='all'?'selected':''}>Tutti i gironi</option>`;
+    gironePhases.slice(1).forEach(p=>{ phaseOpts+=`<option value="${p}" ${calPhase===p?'selected':''}>${p}</option>`; });
+  }
 
   let html=`<div class="filter-bar">
     <input type="text" placeholder="🔍 Cerca nazionale..." value="${calFilter}"
-      oninput="calFilter=this.value;renderCalendario()" style="width:160px"/>
-    <select onchange="calPhase=this.value;calTurno='all';renderCalendario()">
-      ${phases.map(p=>`<option value="${p}" ${calPhase===p?'selected':''}>${p==='all'?'Tutte le fasi':p}</option>`).join('')}
-    </select>
-    <select onchange="calTurno=this.value;renderCalendario()">
-      <option value="all" ${calTurno==='all'?'selected':''}>Tutti i turni</option>
+      oninput="calFilter=this.value;renderCalendario()" style="width:155px"/>
+    <select onchange="calTurno=this.value;calPhase='all';renderCalendario()">
+      <option value="all" ${calTurno==='all'?'selected':''}>Tutte le giornate</option>
       <option value="1" ${calTurno==='1'?'selected':''}>1ª giornata</option>
       <option value="2" ${calTurno==='2'?'selected':''}>2ª giornata</option>
       <option value="3" ${calTurno==='3'?'selected':''}>3ª giornata</option>
       <option value="elim" ${calTurno==='elim'?'selected':''}>Fase eliminatoria</option>
     </select>
+    <select onchange="calPhase=this.value;renderCalendario()">${phaseOpts}</select>
     <span style="font-size:11px;background:var(--bg2);color:var(--text2);padding:2px 10px;border-radius:10px;border:.5px solid var(--border)">${MATCHES.length} partite</span>
   </div>
   <p class="fnote"><i class="ti ti-info-circle"></i> Clicca su una partita per espandere e inserire voti. Per le eliminatorie scegli le nazionali qualificate.</p>`;
 
   dayOrder.forEach(day=>{
     const ms=byDay[day].filter(m=>{
-      const phOk=calPhase==='all'||m.phase===calPhase;
-      const srOk=!calFilter||[m.t1,m.t2,m.label1||'',m.label2||'',m.phase].some(s=>s.toLowerCase().includes(calFilter.toLowerCase()));
+      // Filtro testo: cerca in squadre, label e fase
+      const searchTerms=[m.t1||'', m.t2||'', m.label1||'', m.label2||'', m.phase||''];
+      const srOk=!calFilter||searchTerms.some(s=>s.toLowerCase().includes(calFilter.toLowerCase()));
+
+      // Filtro turno
       let turnoOk=true;
       if(calTurno==='elim') turnoOk=m.elim===true;
-      else if(calTurno!=='all') turnoOk=!m.elim&&GIRONE_ROUND[m.id]===parseInt(calTurno);
-      return phOk&&srOk&&turnoOk;
+      else if(calTurno==='1') turnoOk=!m.elim && GIRONE_ROUND[m.id]===1;
+      else if(calTurno==='2') turnoOk=!m.elim && GIRONE_ROUND[m.id]===2;
+      else if(calTurno==='3') turnoOk=!m.elim && GIRONE_ROUND[m.id]===3;
+      // calTurno==='all': mostra tutto
+
+      // Filtro fase (sotto-filtro del turno)
+      const phOk=calPhase==='all'||m.phase===calPhase;
+
+      return srOk&&turnoOk&&phOk;
     });
     if(!ms.length)return;
     html+=`<div class="day-block"><div class="day-header">${day}<span class="day-badge">${ms.length}</span></div>`;
