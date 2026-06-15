@@ -92,7 +92,12 @@ nav button:hover:not(.active){background:var(--bg2)}
 .team-box-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .pitem{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:.5px solid var(--border);font-size:12px}
 .pitem:last-child{border-bottom:none}
+.pitem.suspended{opacity:.45}
+.pitem.suspended .pname-text{text-decoration:line-through}
 .pnation{color:var(--text2);font-size:11px;min-width:80px}
+.susp-btn{background:transparent;border:.5px solid var(--border2);border-radius:6px;cursor:pointer;font-size:10px;padding:2px 7px;color:var(--text2);font-family:inherit;white-space:nowrap;flex-shrink:0}
+.susp-btn:hover{background:var(--bg2)}
+.susp-btn.active{background:#FAEEDA;color:#633806;border-color:#c8a060}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
@@ -351,6 +356,22 @@ const MATCHES=[
   {id:'m104',date:'2026-07-19',day:'Dom 19 Luglio',      phase:'Finale',           elim:true, t1:'',t2:'',label1:'Vince M101',label2:'Vince M102'},
 ];
 
+// Mappa match → turno girone (1,2,3)
+const GIRONE_ROUND={
+  m1:1,m2:1,m25:2,m28:2,m53:3,m54:3,
+  m3:1,m5:1,m26:2,m27:2,m49:3,m50:3,
+  m6:1,m7:1,m30:2,m31:2,m51:3,m52:3,
+  m4:1,m8:1,m29:2,m32:2,m59:3,m60:3,
+  m9:1,m11:1,m34:2,m35:2,m55:3,m56:3,
+  m10:1,m12:1,m33:2,m36:2,m57:3,m58:3,
+  m14:1,m16:1,m38:2,m40:2,m65:3,m66:3,
+  m13:1,m15:1,m37:2,m39:2,m63:3,m64:3,
+  m17:1,m18:1,m42:2,m43:2,m61:3,m62:3,
+  m19:1,m20:1,m41:2,m44:2,m71:3,m72:3,
+  m21:1,m24:1,m45:2,m48:2,m69:3,m70:3,
+  m22:1,m23:1,m46:2,m47:2,m67:3,m68:3,
+};
+
 // Lookup nazione → {player, team}
 const NATION_MAP={};
 TEAMS.forEach(t=>t.players.forEach(p=>{
@@ -379,6 +400,7 @@ function setSyncStatus(ok){
 }
 
 onValue(ref(db,'scores'), snap=>{ scores=snap.val()||{}; if(currentPage==='classifica')renderClassifica(); setSyncStatus(true); }, ()=>setSyncStatus(false));
+onValue(ref(db,'suspended'), snap=>{ suspended=snap.val()||{}; if(currentPage==='rose')renderRose(); if(currentPage==='calendario')renderCalendario(); });
 onValue(ref(db,'results'), snap=>{ results=snap.val()||{}; if(currentPage==='calendario')renderCalendario(); });
 onValue(ref(db,'elim'), snap=>{
   elimTeams=snap.val()||{};
@@ -394,6 +416,19 @@ function showToast(msg){
 }
 
 function safeKey(s){ return s.replace(/[.#$/\[\]]/g,'_'); }
+
+// ── SOSPESI ──
+let suspended={};
+function isPlayerSuspended(teamId, playerName){
+  const k=safeKey(teamId+'__'+playerName);
+  return suspended[k]===true;
+}
+window.toggleSuspend=async function(teamId, playerName){
+  const k=safeKey(teamId+'__'+playerName);
+  const cur=suspended[k]===true;
+  await set(ref(db,'suspended/'+k), cur?null:true);
+  showToast(cur?'Giocatore riattivato':'Giocatore sospeso');
+};
 
 async function setScore(mid,pname,val){
   const k=safeKey(mid+'__'+pname);
@@ -427,6 +462,7 @@ let currentPage='classifica';
 let expandedMatch=null;
 let calFilter='';
 let calPhase='all';
+let calTurno='all';
 
 window.goPage=function(page,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -526,9 +562,16 @@ function renderCalendario(){
 
   let html=`<div class="filter-bar">
     <input type="text" placeholder="🔍 Cerca nazionale..." value="${calFilter}"
-      oninput="calFilter=this.value;renderCalendario()" style="width:180px"/>
-    <select onchange="calPhase=this.value;renderCalendario()">
+      oninput="calFilter=this.value;renderCalendario()" style="width:160px"/>
+    <select onchange="calPhase=this.value;calTurno='all';renderCalendario()">
       ${phases.map(p=>`<option value="${p}" ${calPhase===p?'selected':''}>${p==='all'?'Tutte le fasi':p}</option>`).join('')}
+    </select>
+    <select onchange="calTurno=this.value;renderCalendario()">
+      <option value="all" ${calTurno==='all'?'selected':''}>Tutti i turni</option>
+      <option value="1" ${calTurno==='1'?'selected':''}>1ª giornata</option>
+      <option value="2" ${calTurno==='2'?'selected':''}>2ª giornata</option>
+      <option value="3" ${calTurno==='3'?'selected':''}>3ª giornata</option>
+      <option value="elim" ${calTurno==='elim'?'selected':''}>Fase eliminatoria</option>
     </select>
     <span style="font-size:11px;background:var(--bg2);color:var(--text2);padding:2px 10px;border-radius:10px;border:.5px solid var(--border)">${MATCHES.length} partite</span>
   </div>
@@ -538,7 +581,10 @@ function renderCalendario(){
     const ms=byDay[day].filter(m=>{
       const phOk=calPhase==='all'||m.phase===calPhase;
       const srOk=!calFilter||[m.t1,m.t2,m.label1||'',m.label2||'',m.phase].some(s=>s.toLowerCase().includes(calFilter.toLowerCase()));
-      return phOk&&srOk;
+      let turnoOk=true;
+      if(calTurno==='elim') turnoOk=m.elim===true;
+      else if(calTurno!=='all') turnoOk=!m.elim&&GIRONE_ROUND[m.id]===parseInt(calTurno);
+      return phOk&&srOk&&turnoOk;
     });
     if(!ms.length)return;
     html+=`<div class="day-block"><div class="day-header">${day}<span class="day-badge">${ms.length}</span></div>`;
@@ -547,7 +593,7 @@ function renderCalendario(){
       const res=results[m.id]||'';
       const displayT1=m.t1||(m.label1||'?');
       const displayT2=m.t2||(m.label2||'?');
-      const players=m.t1&&m.t2?getPlayersInMatch(m.t1,m.t2):[];
+      const players=(m.t1&&m.t2?getPlayersInMatch(m.t1,m.t2):[]).filter(({player,team})=>!isPlayerSuspended(team.id,player.name));
       let nScored=0;
       players.forEach(({player})=>{ const k=safeKey(m.id+'__'+player.name); if(typeof scores[k]==='number')nScored++; });
 
@@ -634,10 +680,12 @@ function renderRose(){
         let pts=0,cnt=0;
         const pk=safeKey('__'+p.name);
         Object.keys(scores).forEach(sk=>{ if(sk.endsWith(pk)&&typeof scores[sk]==='number'){pts+=scores[sk];cnt++;} });
-        html+=`<div class="pitem">
+        const susp=isPlayerSuspended(t.id,p.name);
+        html+=`<div class="pitem${susp?' suspended':''}">
           <div class="pnation">${p.nation}</div>
-          <div style="flex:1">${p.name}</div>
-          <div style="font-size:11px;${cnt?'color:var(--green);font-weight:600':'color:var(--text3)'}">${cnt?pts.toFixed(1):'—'}</div>
+          <div style="flex:1" class="pname-text">${p.name}</div>
+          <div style="font-size:11px;${cnt?'color:var(--green);font-weight:600':'color:var(--text3);'};margin-right:6px">${cnt?pts.toFixed(1):'—'}</div>
+          <button class="susp-btn${susp?' active':''}" onclick="toggleSuspend('${t.id}','${p.name}')" title="${susp?'Riattiva':'Sospendi'}">${susp?'Riattiva':'Sospendi'}</button>
         </div>`;
       });
     }
