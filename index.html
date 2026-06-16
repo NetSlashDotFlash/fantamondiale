@@ -739,7 +739,10 @@ function renderRose(){
         html+=`<div class="pitem${susp?' suspended':''}">
           <div class="pnation">${p.nation}</div>
           <div style="flex:1" class="pname-text">${p.name}</div>
-          <div style="font-size:11px;${cnt?'color:var(--green);font-weight:600':'color:var(--text3);'};margin-right:6px">${cnt?pts.toFixed(1):'—'}</div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;margin-right:6px;gap:1px">
+            <span style="font-size:11px;${cnt?'color:var(--green);font-weight:600':'color:var(--text3)'}">${cnt?pts.toFixed(1):'—'}</span>
+            ${cnt?`<span style="font-size:10px;color:var(--text3)">${cnt} part.</span>`:''}
+          </div>
           <button class="susp-btn${susp?' active':''}" onclick="toggleSuspend('${t.id}','${p.name}')" title="${susp?'Riattiva':'Sospendi'}">${susp?'Riattiva':'Sospendi'}</button>
         </div>`;
       });
